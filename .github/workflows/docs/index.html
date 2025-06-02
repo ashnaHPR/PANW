@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Palo Alto Networks News</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 700px; }
+    h1 { color: #0070f3; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 15px; }
+    a { text-decoration: none; color: #0366d6; }
+    a:hover { text-decoration: underline; }
+    .date { font-size: 0.9em; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>Latest News for Palo Alto Networks</h1>
+  <ul id="news-list">Loading news...</ul>
+
+  <script>
+    fetch('data/news_results.json')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('news-list');
+        list.innerHTML = ''; // Clear loading text
+        if (!data.articles || data.articles.length === 0) {
+          list.innerHTML = '<li>No news found.</li>';
+          return;
+        }
+        data.articles.forEach(article => {
+          const li = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = article.url;
+          link.target = '_blank';
+          link.textContent = article.title;
+
+          const dateSpan = document.createElement('span');
+          dateSpan.textContent = ` (${article.publishedAt.slice(0,10)})`;
+          dateSpan.className = 'date';
+
+          li.appendChild(link);
+          li.appendChild(dateSpan);
+          list.appendChild(li);
+        });
+      })
+      .catch(err => {
+        document.getElementById('news-list').innerHTML = '<li>Failed to load news.</li>';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
