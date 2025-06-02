@@ -2,7 +2,7 @@ name: Daily News Fetch
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Run every day at 8am UTC
+    - cron: '0 8 * * *'  # Runs every day at 08:00 UTC
   workflow_dispatch:      # Allows manual runs from GitHub UI
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -22,10 +22,13 @@ jobs:
         run: pip install requests
 
       - name: Run news fetch script
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
         run: python news_fetch.py
 
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: news-results
-          path: news_results.csv
+      - name: Commit and push updated news data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/news_results.json
+          git diff --cached --quiet || (git commit -m "Update news data $(date +'%Y-%m-%d')" && git push)
