@@ -10,9 +10,11 @@ API_KEY = os.getenv("NEWSAPI_KEY", "your-newsapi-key-here")
 company = "Palo Alto Networks"
 spokespeople = ["Carla Baker", "Scott Mckinnon"]
 
-# Build the NewsAPI query
-query = f'("{company}") AND ("{" OR ".join(spokespeople)}")'
+# Properly build query: quote each spokesperson name
+quoted_names = [f'"{name}"' for name in spokespeople]
+query = f'("{company}") AND ({" OR ".join(quoted_names)})'
 
+# NewsAPI request setup
 url = "https://newsapi.org/v2/everything"
 params = {
     "q": query,
@@ -26,7 +28,7 @@ response = requests.get(url, params=params)
 data = response.json()
 
 articles = data.get("articles", [])
-print(f"Found {len(articles)} articles")
+print(f"📣 Found {len(articles)} articles")
 
 # Create output directory
 os.makedirs("docs", exist_ok=True)
